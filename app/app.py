@@ -45,7 +45,7 @@ grouped_data = data.groupby(['day_of_week', 'hour']).agg({
 grouped_data.columns = ['day_of_week', 'hour', 'duration_mean', 'duration_median', 'duration_std', 'fare_mean', 'fare_median', 'fare_std']
 
 # Streamlit app
-st.title('Trip Duration and Fare Analysis')
+tab1.title('Trip Duration and Fare Analysis')
 
 # Add a slider for selecting hour of the day
 selected_hour = st.slider('Select Hour of the Day', min_value=0, max_value=23, value=12, step=1)
@@ -67,7 +67,7 @@ ax.set_xticklabels(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 ax.legend()
 
 # Display the plot in Streamlit
-st.pyplot(fig)
+tab1.pyplot(fig)
 
 
 
