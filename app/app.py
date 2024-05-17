@@ -79,6 +79,8 @@ tab2.title('Trip Search')
 input_origin_address = tab2.text_input('Origin:')
 suggestions = []
 
+orlat, orlng, destlat, destlng = None, None, None, None
+
 if input_origin_address:
     suggestions = get_place_suggestions(input_origin_address)
 
@@ -143,3 +145,9 @@ tab2.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
 #write origin and destination coordinates
 #tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
 #tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
+
+if tab2.button('Submit'):
+    # Call your functions here
+    tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
+    tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
+    # ...
