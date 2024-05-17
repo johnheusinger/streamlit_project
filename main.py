@@ -1,4 +1,4 @@
-from functions import *
+from src.functions import *
 
 if __name__ == '__main__':
     DATA_PATH: str = '../data/ny_cab_csv/nyc_taxi_data_2014.csv'
