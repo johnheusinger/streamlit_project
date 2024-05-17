@@ -1,4 +1,4 @@
-from functions import *
+from src.functions import *
 
 if __name__ == '__main__':
     DATA_PATH: str = '../data/ny_cab_csv/nyc_taxi_data_2014.csv'
@@ -37,4 +37,4 @@ if __name__ == '__main__':
         tree = train_tree(X_train, y_train[target], X_val, y_val[target], MAX_DEPTH)
         file_name = 'tree_' + str(target) + '.pkl'
         file_path = OUT_PATH + file_name
-        pickle_tree(tree, file_path)
+        pickle_model(tree, file_path)
