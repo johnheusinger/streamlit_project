@@ -143,33 +143,34 @@ else:
 
 
 # Layout for day of the week and time
-col1, col2, col3, col4 = tab2.columns(4)
+with tab2:
+    col1, col2, col3, col4 = tab2.columns(4)
 
-with col1:
-    day_of_week = tab2.selectbox('Day:', 
-                               ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-    day_of_week_int = day_of_week_to_int(day_of_week)
+    with col1:
+        day_of_week = st.selectbox('Day:', 
+                                ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+        day_of_week_int = day_of_week_to_int(day_of_week)
 
-with col2:
-    hour = tab2.selectbox('Hour:', list(range(1, 13)))
+    with col2:
+        hour = st.selectbox('Hour:', list(range(1, 13)))
 
-with col3:
-    minute = tab2.selectbox('Minute:', [f"{i:02}" for i in range(60)])
+    with col3:
+        minute = st.selectbox('Minute:', [f"{i:02}" for i in range(60)])
 
-with col4:
-    ampm = tab2.selectbox('AM/PM:', ['AM', 'PM'])
+    with col4:
+        ampm = st.selectbox('AM/PM:', ['AM', 'PM'])
 
-# Convert time to 24-hour format
-if ampm == 'PM' and hour != 12:
-    hour_24 = hour + 12
-elif ampm == 'AM' and hour == 12:
-    hour_24 = 0
-else:
-    hour_24 = hour
+    # Convert time to 24-hour format
+    if ampm == 'PM' and hour != 12:
+        hour_24 = hour + 12
+    elif ampm == 'AM' and hour == 12:
+        hour_24 = 0
+    else:
+        hour_24 = hour
 
 
-tab2.write(f"You selected: {day_of_week} at {hour:02}:{minute:02} {ampm}")
-tab2.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
+    st.write(f"You selected: {day_of_week} at {hour:02}:{minute:02} {ampm}")
+    st.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
 
 
 
