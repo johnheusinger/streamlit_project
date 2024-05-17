@@ -190,9 +190,8 @@ if tab2.button('Submit'):
                            tree_models=[tree_fare, tree_duration],
                            reg_targets=['tip_amount'],
                            reg_models=[linreg_tip_amount]
-    ),
+    )
     
     tab2.write(f"Predicted trip duration: {pred['trip_duration']}")                       
     tab2.write(f"Predicted fare: {pred['fare_amount']}")
     tab2.write(f"Predicted tip amount: {pred['tip_amount']}")
-    
