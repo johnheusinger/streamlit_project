@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_place_suggestions, get_place_details, day_of_week_to_int
+from utils import get_place_suggestions, get_place_details, day_of_week_to_int, predict_tip_amount
 
 
 tab1, tab2 = st.tabs(["📈 Exploration", "🗃 Prediction"])
@@ -147,3 +147,8 @@ if tab2.button('Submit'):
     # Call prediction functions here
     tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
     tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
+    
+    # Predict tip amount
+    pred = predict_tip_amount(hour=hour_24, day_of_week=day_of_week_int, gps_distance=5.2, pickup_latitude=orlat, pickup_longitude=orlng)
+
+    tab2.write(f"Predicted tip amount: {pred}")

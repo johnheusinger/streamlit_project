@@ -60,7 +60,7 @@ def predict_tip_amount(hour:int = 14,
                        pickup_latitude:float= 40.748817,
                        pickup_longitude:float= -73.985428):
     # Load the model
-    model = joblib.load('tip_amount_model.pkl')
+    model = joblib.load('./outputs/models/tip_amount_model.pkl')
     
 
     input_X = constructInputdf(hour,
