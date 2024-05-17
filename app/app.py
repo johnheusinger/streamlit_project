@@ -15,7 +15,7 @@ API_KEY = st.secrets["GOOGLE_MAPS_API_KEY"]
 
 # The stuff under tab1.xyz are all exploration related UI eliments.
 tab1.subheader("A tab with a chart")
-df = pd.read_csv("outputs/data/VisualizeLocations.csv")
+df = pd.read_csv("outputs/csvdata/VisualizeLocations.csv")
 # pickups = pd.read_csv("data/processed_data/PickupLocations.csv")
 # dropoff = pd.read_csv("data/processed_data/DropoffLocations.csv")
 
@@ -28,7 +28,7 @@ tab1.map(df20, size=2, color='color')
 # JFK trips code.
 
 # Load data from file
-data = pd.read_csv('outputs/data/JFK_trips.csv')  # Load your dataset
+data = pd.read_csv('outputs/csvdata/JFK_trips.csv')  # Load your dataset
 
 # Extract hour and day of week from pickup_datetime
 data['pickup_datetime'] = pd.to_datetime(data['pickup_datetime'])
@@ -48,7 +48,7 @@ grouped_data.columns = ['day_of_week', 'hour', 'duration_mean', 'duration_median
 tab1.title('Trip Duration and Fare Analysis')
 
 # Add a slider for selecting hour of the day
-selected_hour = st.slider('Select Hour of the Day', min_value=0, max_value=23, value=12, step=1)
+selected_hour = tab1.slider('Select Hour of the Day', min_value=0, max_value=23, value=12, step=1)
 
 # Filter data for the selected hour of the day
 filtered_data = grouped_data[grouped_data['hour'] == selected_hour]
