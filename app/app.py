@@ -142,12 +142,8 @@ else:
 
 tab2.write(f"You selected: {day_of_week} at {hour:02}:{minute:02} {ampm}")
 tab2.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
-#write origin and destination coordinates
-#tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
-#tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
 
 if tab2.button('Submit'):
-    # Call your functions here
+    # Call prediction functions here
     tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
     tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
-    # ...
