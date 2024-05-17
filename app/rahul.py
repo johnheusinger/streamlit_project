@@ -1,43 +1,12 @@
 import streamlit as st
-import requests
 import pandas as pd
 import numpy as np
+
+tab1, tab2 = st.tabs(["📈 Exploration", "🗃 Prediction"])
+
 import joblib
+import pandas as pd
 
-API_KEY = st.secrets["GOOGLE_MAPS_API_KEY"]
-
-# Get place suggestions
-def get_place_suggestions(input_text):
-    url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input={input_text}&types=geocode&key={API_KEY}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        predictions = response.json().get('predictions', [])
-        return [{'description': item['description'], 'place_id': item['place_id']} for item in predictions]
-    else:
-        return []
-
-# Get place details to fetch GPS coordinates
-def get_place_details(place_id):
-    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={API_KEY}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        result = response.json().get('result', {})
-        location = result.get('geometry', {}).get('location', {})
-        return location.get('lat'), location.get('lng')
-    else:
-        return None, None
-
-def day_of_week_to_int(day_of_week):
-    days = {
-        'Monday': 0,
-        'Tuesday': 1,
-        'Wednesday': 2,
-        'Thursday': 3,
-        'Friday': 4,
-        'Saturday': 5,
-        'Sunday': 6
-    }
-    return days[day_of_week]
 
 def constructInputdf(hour:int = 14,
                      day_of_week:int= 3,
@@ -60,7 +29,7 @@ def predict_tip_amount(hour:int = 14,
                        pickup_latitude:float= 40.748817,
                        pickup_longitude:float= -73.985428):
     # Load the model
-    model = joblib.load('./outputs/models/tip_amount_model.pkl')
+    model = joblib.load('tip_amount_model.pkl')
     
 
     input_X = constructInputdf(hour,
@@ -77,3 +46,25 @@ def predict_tip_amount(hour:int = 14,
     predictions = model.predict(input_X)
     
     return predictions
+
+
+# The stuff under tab1.xyz are all exploration related UI eliments.
+tab1.subheader("A tab with a chart")
+df = pd.read_csv("data/outputs/VisualizeLocations.csv")
+# pickups = pd.read_csv("data/processed_data/PickupLocations.csv")
+# dropoff = pd.read_csv("data/processed_data/DropoffLocations.csv")
+
+df20 =  df.head(20000)
+# pick_df20 =  pickups.head(20000)
+# drop_df20 =  dropoff.head(20000)
+
+tab1.map(df20, size=2, color='color')
+
+
+# The stuff under tab2.xyz are all prediction related UI eliments and the predictions.
+tab2.subheader("A tab with the data")
+tab2.write(df20)
+
+
+# # Sample df DataFrame
+# sampled_df = df.sample(frac=0.0005, random_state=1)

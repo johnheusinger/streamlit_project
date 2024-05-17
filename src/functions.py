@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
 from geopy.distance import geodesic
 import pickle
 import logging
@@ -168,7 +169,7 @@ def train_tree(X_train: pd.DataFrame, y_train: pd.Series, X_val: pd.DataFrame, y
     logger.info(f"Trained Tree Regressor with r² score of {score:.2f}")
     return tree
 
-def pickle_tree(tree: DecisionTreeRegressor, file_path: str) -> None:
+def pickle_model(tree: DecisionTreeRegressor, file_path: str) -> None:
     """
     Pickles a DecisionTreeRegressor object and saves it to a file.
 
@@ -183,7 +184,7 @@ def pickle_tree(tree: DecisionTreeRegressor, file_path: str) -> None:
         pickle.dump(tree, file)
     logger.info(f"Tree saved to {file_path}")
 
-def load_tree(file_path: str) -> DecisionTreeRegressor:
+def load_model(file_path: str) -> DecisionTreeRegressor:
     """
     Load a decision tree from a file.
 
@@ -196,29 +197,74 @@ def load_tree(file_path: str) -> DecisionTreeRegressor:
     """
     with open(file_path, 'rb') as file:
         tree = pickle.load(file)
-    logger.info(f"Tree loaded from {file_path}")
     return tree
 
-def make_prediction(tree: DecisionTreeRegressor, X_values: np.ndarray):
+def make_prediction(hour: int,
+                    minute: int,
+                    day_of_week: int,
+                    pickup_lat: float,
+                    pickup_long: float,
+                    dropoff_lat: float,
+                    dropoff_long: float,
+                    tree_targets: list,
+                    tree_models: list,
+                    reg_targets: list,
+                    reg_models: list):
     """
-    Makes predictions using a trained decision tree model.
+    Make a prediction using the given input parameters and return the predictions for each target.
 
     Parameters:
-    tree (DecisionTreeRegressor): The trained decision tree model.
-    X_values (np.ndarray): The input values for which predictions are to be made:
-        - start_hour: The hour of the day when the trip started.
-        - start_minute: The minute of the hour when the trip started.
-        - passenger_count: The number of passengers.
-        - pickup_longitude: The longitude of the pickup location.
-        - pickup_latitude: The latitude of the pickup location.
-        - dropoff_longitude: The longitude of the dropoff location.
-        - dropoff_latitude: The latitude of the dropoff location.
-        - rate_code: The rate code for the trip.
-        - day_of_week: The day of the week when the trip started.
-        - gps_distance: The distance between the pickup and dropoff locations.
+    hour (int): The hour of the pickup time.
+    minute (int): The minute of the pickup time.
+    day_of_week (int): The day of the week (0-6, where Monday is 0 and Sunday is 6).
+    pickup_lat (float): The latitude of the pickup location.
+    pickup_long (float): The longitude of the pickup location.
+    dropoff_lat (float): The latitude of the dropoff location.
+    dropoff_long (float): The longitude of the dropoff location.
+    targets (list): A list of target names.
+    models (list): A list of machine learning models.
 
     Returns:
-    np.ndarray: The predicted values.
+    dict: A dictionary containing the predictions for each target, where the target name is the key and the prediction is the value.
     """
-    return tree.predict(X_values)
+    
+    output = {}
 
+    gps_distance = geodesic((pickup_lat, pickup_long), (dropoff_lat, dropoff_long)).miles
+    passenger_count = 1
+    rate_code = 1
+
+    tree_input = np.array(
+        [
+            hour,
+            minute,
+            passenger_count,
+            pickup_long,
+            pickup_lat,
+            dropoff_long,
+            dropoff_lat,
+            rate_code,
+            day_of_week,
+            gps_distance
+        ]
+    ).reshape(1, -1)
+
+    regression_input = np.array(
+        [
+            hour,
+            day_of_week,
+            gps_distance,
+            pickup_lat,
+            pickup_long,
+        ]
+    ).reshape(1, -1)
+
+    for model, target in zip(tree_models, tree_targets):    
+        predictions = model.predict(tree_input)
+        output[target] = predictions[0] 
+
+    for model, target in zip(reg_models, reg_targets):
+        predictions = model.predict(regression_input)
+        output[target] = predictions[0]
+    
+    return output
