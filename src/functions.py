@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
 from geopy.distance import geodesic
 import pickle
 import logging
@@ -168,7 +169,7 @@ def train_tree(X_train: pd.DataFrame, y_train: pd.Series, X_val: pd.DataFrame, y
     logger.info(f"Trained Tree Regressor with r² score of {score:.2f}")
     return tree
 
-def pickle_tree(tree: DecisionTreeRegressor, file_path: str) -> None:
+def pickle_model(tree: DecisionTreeRegressor, file_path: str) -> None:
     """
     Pickles a DecisionTreeRegressor object and saves it to a file.
 
@@ -183,7 +184,7 @@ def pickle_tree(tree: DecisionTreeRegressor, file_path: str) -> None:
         pickle.dump(tree, file)
     logger.info(f"Tree saved to {file_path}")
 
-def load_tree(file_path: str) -> DecisionTreeRegressor:
+def load_model(file_path: str) -> DecisionTreeRegressor:
     """
     Load a decision tree from a file.
 
@@ -205,8 +206,10 @@ def make_prediction(hour: int,
                     pickup_long: float,
                     dropoff_lat: float,
                     dropoff_long: float,
-                    targets: list,
-                    models: list):
+                    tree_targets: list,
+                    tree_models: list,
+                    reg_targets: list,
+                    reg_models: list):
     """
     Make a prediction using the given input parameters and return the predictions for each target.
 
@@ -231,7 +234,7 @@ def make_prediction(hour: int,
     passenger_count = 1
     rate_code = 1
 
-    model_input = np.array(
+    tree_input = np.array(
         [
             hour,
             minute,
@@ -246,10 +249,22 @@ def make_prediction(hour: int,
         ]
     ).reshape(1, -1)
 
-    pd.DataFrame(model_input, columns=)
+    regression_input = np.array(
+        [
+            hour,
+            day_of_week,
+            gps_distance,
+            pickup_lat,
+            pickup_long,
+        ]
+    ).reshape(1, -1)
 
-    for model, target in zip(models, targets):    
-        predictions = model.predict(model_input)
+    for model, target in zip(tree_models, tree_targets):    
+        predictions = model.predict(tree_input)
         output[target] = predictions[0] 
+
+    for model, target in zip(reg_models, reg_targets):
+        predictions = model.predict(regression_input)
+        output[target] = predictions[0]
     
     return output
