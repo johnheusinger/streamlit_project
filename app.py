@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_place_suggestions, get_place_details, day_of_week_to_int, predict_tip_amount
-
+from app.utils import get_place_suggestions, get_place_details, day_of_week_to_int, predict_tip_amount
+from src.functions import make_prediction, load_model
 
 tab1, tab2 = st.tabs(["📈 Exploration", "🗃 Prediction"])
 
@@ -69,6 +69,10 @@ ax.legend()
 # Display the plot in Streamlit
 tab1.pyplot(fig)
 
+
+tree_fare, tree_duration, linreg_tip_amount = load_model('outputs/models/tree_fare_amount.pkl'), \
+                            load_model('outputs/models/tree_trip_duration.pkl'), \
+                            load_model('outputs/models/tip_amount_model.pkl')
 
 
 ### The PREDICTION TAB 2
@@ -143,12 +147,28 @@ else:
 tab2.write(f"You selected: {day_of_week} at {hour:02}:{minute:02} {ampm}")
 tab2.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
 
+
+
 if tab2.button('Submit'):
     # Call prediction functions here
     tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
     tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
     
     # Predict tip amount
-    pred = predict_tip_amount(hour=hour_24, day_of_week=day_of_week_int, gps_distance=5.2, pickup_latitude=orlat, pickup_longitude=orlng)
-
-    tab2.write(f"Predicted tip amount: {pred}")
+    pred = make_prediction(hour_24,
+                           minute,
+                           day_of_week_int,
+                           orlng,
+                           orlat,
+                           destlng,
+                           destlat,
+                           tree_targets=['fare_amount', 'trip_duration'],
+                           tree_models=[tree_fare, tree_duration],
+                           reg_targets=['tip_amount'],
+                           reg_models=[linreg_tip_amount]
+    ),
+    
+    tab2.write(f"Predicted trip duration: {pred['trip_duration']}")                       
+    tab2.write(f"Predicted fare: {pred['fare_amount']}")
+    tab2.write(f"Predicted tip amount: {pred['tip_amount']}")
+    
