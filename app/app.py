@@ -48,7 +48,7 @@ grouped_data.columns = ['day_of_week', 'hour', 'duration_mean', 'duration_median
 tab1.title('Trip Duration and Fare Analysis')
 
 # Add a slider for selecting hour of the day
-selected_hour = st.slider('Select Hour of the Day', min_value=0, max_value=23, value=12, step=1)
+selected_hour = tab1.slider('Select Hour of the Day', min_value=0, max_value=23, value=12, step=1)
 
 # Filter data for the selected hour of the day
 filtered_data = grouped_data[grouped_data['hour'] == selected_hour]
