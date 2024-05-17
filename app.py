@@ -3,8 +3,10 @@ import requests
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_place_suggestions, get_place_details, day_of_week_to_int
-
+from app.utils import get_place_suggestions, get_place_details, day_of_week_to_int, predict_tip_amount
+from src.functions import make_prediction, load_model
+import plotly.express as px
+import plotly.graph_objects as go
 
 tab1, tab2 = st.tabs(["📈 Exploration", "🗃 Prediction"])
 
@@ -53,22 +55,48 @@ selected_hour = tab1.slider('Select Hour of the Day', min_value=0, max_value=23,
 # Filter data for the selected hour of the day
 filtered_data = grouped_data[grouped_data['hour'] == selected_hour]
 
-# Plotting
-fig, ax = plt.subplots(figsize=(10, 6))
+# Plotting with Plotly
+fig = go.Figure()
 
-# Plot duration statistics
-ax.errorbar(filtered_data['day_of_week'], filtered_data['duration_mean'], yerr=filtered_data['duration_std'], fmt='o', label='Mean', capsize=5)
-ax.plot(filtered_data['day_of_week'], filtered_data['duration_median'], marker='o', label='Median')
-ax.set_title(f'Trip Duration Statistics for Hour {selected_hour}')
-ax.set_xlabel('Day of Week')
-ax.set_ylabel('Duration (minutes)')
-ax.set_xticks(range(7))
-ax.set_xticklabels(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-ax.legend()
+# Add mean line with error bars
+fig.add_trace(go.Scatter(
+    x=filtered_data['day_of_week'],
+    y=filtered_data['duration_mean'],
+    mode='lines+markers',
+    name='Mean',
+    error_y=dict(type='data', array=filtered_data['duration_std'], visible=True),
+    line=dict(color='royalblue')
+))
+
+# Add median line
+fig.add_trace(go.Scatter(
+    x=filtered_data['day_of_week'],
+    y=filtered_data['duration_median'],
+    mode='lines+markers',
+    name='Median',
+    line=dict(color='orange')
+))
+
+# Update layout for dark theme
+fig.update_layout(
+    title=f'Trip Duration Statistics for Hour {selected_hour}',
+    xaxis_title='Day of Week',
+    yaxis_title='Duration (minutes)',
+    xaxis=dict(
+        tickmode='array',
+        tickvals=list(range(7)),
+        ticktext=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    ),
+    template='plotly_dark'
+)
 
 # Display the plot in Streamlit
-tab1.pyplot(fig)
+tab1.plotly_chart(fig)
 
+
+tree_fare, tree_duration, linreg_tip_amount = load_model('outputs/models/tree_fare_amount.pkl'), \
+                            load_model('outputs/models/tree_trip_duration.pkl'), \
+                            load_model('outputs/models/tip_amount_model.pkl')
 
 
 ### The PREDICTION TAB 2
@@ -78,6 +106,8 @@ tab2.title('Trip Search')
 # Text input for the address
 input_origin_address = tab2.text_input('Origin:')
 suggestions = []
+
+orlat, orlng, destlat, destlng = None, None, None, None
 
 if input_origin_address:
     suggestions = get_place_suggestions(input_origin_address)
@@ -140,6 +170,28 @@ else:
 
 tab2.write(f"You selected: {day_of_week} at {hour:02}:{minute:02} {ampm}")
 tab2.write(f"(day {day_of_week_int}, hour {hour_24}, minute {minute})")
-#write origin and destination coordinates
-#tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
-#tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
+
+
+
+if tab2.button('Submit'):
+    # Call prediction functions here
+    tab2.write(f"Origin Coordinates: Latitude {orlat}, Longitude {orlng}")
+    tab2.write(f"Destination Coordinates: Latitude {destlat}, Longitude {destlng}")
+    
+    # Predict tip amount
+    pred = make_prediction(hour_24,
+                           minute,
+                           day_of_week_int,
+                           orlng,
+                           orlat,
+                           destlng,
+                           destlat,
+                           tree_targets=['fare_amount', 'trip_duration'],
+                           tree_models=[tree_fare, tree_duration],
+                           reg_targets=['tip_amount'],
+                           reg_models=[linreg_tip_amount]
+    )
+    
+    tab2.write(f"Predicted trip duration: {pred['trip_duration']}")                       
+    tab2.write(f"Predicted fare: {pred['fare_amount']}")
+    tab2.write(f"Predicted tip amount: {pred['tip_amount']}")
